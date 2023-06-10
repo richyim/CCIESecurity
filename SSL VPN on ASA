@@ -1,0 +1,29 @@
+==================================================
+SSL VPN configuration on vASA
+==================================================
+
+access-list SPLITTUNNELACL standard permit 10.81.0.0 255.255.0.0
+ip local pool VPNPOOL 192.168.101.1-192.168.101.30 mask 255.255.255.0
+!
+group-policy GROUPPOLICYREMOTEACCESS internal
+group-policy GROUPPOLICYREMOTEACCESS attributes
+  vpn-tunnel-protocol ssl-vpn
+  split-tunnel-policy tunnelspecified
+  split-tunnel-network-list value SPLITTUNNELACL
+  address-pool value VPNPOOL
+  webvpn
+    anyconnect ask enable default anyconnect timeout 20
+    anyconnect dpd-interval gateway 10
+    anyconnect keep-installer installed
+!
+tunnel-group TUNNELGROUPREMOTEACCESS type remote-access
+tunnel-group TUNNELGROUPREMOTEACCESS general-attributes
+  default-group-policy GROUPPOLICYREMOTEACCESS
+tunnel-group TUNNELGROUPREMOTEACCESS webvp-attributes
+  alias-group xCloud-hk.net enable
+!
+webvpn
+  enable VPN
+  anyconnect image disk0:/xxx
+  anyconnect enable
+  tunnel-group-list enable
