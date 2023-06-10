@@ -1,0 +1,14 @@
+webvpn
+  enable Outside
+  port-forward SALES-APP 30001 192.168.1.1 80
+  port-forward SALES-APP 30002 192.168.1.2 23
+!
+group-policy SALES internal
+group-policy SALES attributes
+  vpn-tunnel-protocol ssl-clientless
+  webvpn
+    port-forward value SALES-APP
+!
+username someone password somepassword
+username someone attributes
+  vpn-group-policy SALES
