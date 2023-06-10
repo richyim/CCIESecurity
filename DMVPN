@@ -1,0 +1,92 @@
+=================================================
+Phase 1
+=================================================
+
+Hub
+Int tunnel 10
+  ip mtu 1400
+  ip tcp adjust-mss 1360
+  ip address 172.16.1.1 255.255.255.0
+  tunnel source gi 2
+  tunnel mode gre multipoint
+  tunnel-key 1
+  ip nhrp network-id 1
+  ip nhrp authentication C1sc0123
+  ip nhrp multicast map dynamic
+
+Spoke
+Int tunnel 10
+  ip mtu 1400
+  ip tcp adjust-mss 1360
+  ip address 172.16.1.2 255.255.255.0
+  tunnel source gi 2
+  tunnel destination 10.1.1.1
+  tunnel-key 1
+  ip nhrp network-id 1
+  ip nhrp authentication C1sc0123
+  ip nhrp nhs 172.16.1.1
+  ip nhrp map 172.16.1.1 10.1.1.1
+  ip nhrp multicast map 10.1.1.1
+
+=================================================
+Phase 2
+=================================================
+
+Hub
+Int tunnel 10
+  ip mtu 1400
+  ip tcp adjust-mss 1360
+  ip address 172.16.1.1 255.255.255.0
+  tunnel source gi 2
+  tunnel mode gre multipoint
+  tunnel-key 1
+  ip nhrp network-id 1
+  ip nhrp authentication C1sc0123
+  ip nhrp multicast map dynamic
+
+Spoke
+Int tunnel 10
+  ip mtu 1400
+  ip tcp adjust-mss 1360
+  ip address 172.16.1.2 255.255.255.0
+  tunnel source gi 2
+  tunnel mode gre multipoint
+  tunnel-key 1
+  ip nhrp network-id 1
+  ip nhrp authentication C1sc0123
+  ip nhrp nhs 172.16.1.1
+  ip nhrp map 172.16.1.1 10.1.1.1
+  ip nhrp multicast map 10.1.1.1
+
+=================================================
+Phase 3
+=================================================
+
+Hub
+Int tunnel 10
+  ip mtu 1400
+  ip tcp adjust-mss 1360
+  ip address 172.16.1.1 255.255.255.0
+  tunnel source gi 2
+  tunnel mode gre multipoint
+  tunnel-key 1
+  ip nhrp network-id 1
+  ip nhrp authentication C1sc0123
+  ip nhrp multicast map dynamic
+  ip nhrp redirect
+
+Spoke
+Int tunnel 10
+  ip mtu 1400
+  ip tcp adjust-mss 1360
+  ip address 172.16.1.2 255.255.255.0
+  tunnel source gi 2
+  tunnel mode gre multipoint
+  tunnel-key 1
+  ip nhrp network-id 1
+  ip nhrp authentication C1sc0123
+  ip nhrp nhs 172.16.1.1
+  ip nhrp map 172.16.1.1 10.1.1.1
+  ip nhrp multicast map 10.1.1.1
+  ip nhrp shortcut
+
