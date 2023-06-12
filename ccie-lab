@@ -35,9 +35,7 @@ Lab # 1 : Configuring a LAN - To - LAN IPSec Tunnel between R1 & R2 to encrypt t
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 R1
-
 ! 1. Phase I - ISAKMP Parameters
-
 crypto isakmp policy 5
  authentication pre-share
  encryption 3des
@@ -45,31 +43,21 @@ crypto isakmp policy 5
  group 2
 !
 crypto isakmp key cisco123 address 200.1.1.1
-
 ! 2. Phase II - ESP Parameters
-
 crypto ipsec transform-set TSET esp-3des esp-sha-hmac
-
 ! 3. Interesting Traffic - Crypto ACL
-
 access-list 101 permit ip 10.1.1.0 0.0.0.255 10.2.2.0 0.0.0.255
-
 ! 4. Link the above parameters to each other. This is done by using a Crypto Map Component
-
 crypto map CMAP 10 ipsec-isakmp
  match address 101
  set peer 200.1.1.1
  set transform-set TSET
-
 ! 5. Apply the Crypto Map on the outgoing Interface
-
 Interface E 0/0
  crypto map CMAP
 
 R2
-
 ! 1. Phase I - ISAKMP Parameters
-
 crypto isakmp policy 15
  authentication pre-share
  encryption 3des
@@ -77,29 +65,20 @@ crypto isakmp policy 15
  group 2
 !
 crypto isakmp key cisco123 address 199.1.1.1
-
 ! 2. Phase II - ESP Parameters
-
 crypto ipsec transform-set TSET esp-3des esp-sha-hmac
-
 ! 3. Interesting Traffic - Crypto ACL
-
 access-list 101 permit ip  10.2.2.0 0.0.0.255 10.1.1.0 0.0.0.255
-
 ! 4. Link the above parameters to each other. This is done by using a Crypto Map Component
-
 crypto map CMAP 10 ipsec-isakmp
  match address 101
  set peer 199.1.1.1
  set transform-set TSET
-
 ! 5. Apply the Crypto Map on the outgoing Interface
-
 Interface E 0/0
  crypto map CMAP
 
 Verification Commands:
-
 Phase I - Show crypto isakmp sa
 Phase II - Show crypto ipsec sa
 
