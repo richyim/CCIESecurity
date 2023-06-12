@@ -1,0 +1,692 @@
+1. VPNs 
+     - Basic LAN - To - LAN VPNs [IPSEC (Crypto Maps), GRE, GRE Over IPSec, S-VTI]
+     - M-GRE
+     - DMVPN
+     - GET VPN
+     - IKEv2 VPNs
+     - Flex VPN
+     - VRF Aware VPNs
+     - Certificate Based VPNs
+     - ASA Based VPNs (LAN-2-LAN, VPNs thru the ASA, Remote Access VPNs (WebVPN, AnyConnect)
+
+2. Firewall
+    - ASA Firewall (Basic Initialization, Routing, NAT, Redundancy, Virtualization)
+    - Zone-Based Firewall (ZBF)
+    - FTD (Basic Initialization, Routing, NAT, ACP, IPS)
+
+3. Content Filtering
+    - WSA (Basic Initialization - CLI, Basic Initialization - GUI, WCCP Relationship with Router, Access Policies)
+    - ESA  (E-Mail Flow Overview, Basic Initialization - CLI, Basic Initialization - GUI, SMTP Relay Configuration, E-Mail Policies)
+
+4. Wireless Networking
+    - Overview of Wireless Networking (Controlled Based Wireless)
+    - Networking configuration required for Wireless
+    - Basic Initialization of the WLC
+    - Basic Wireless LAN Setup
+
+5. ISE Configuration
+    - Overview of ISE
+    - Wireless ISE (Dot1x Authentication)
+    - Wired ISE (Dot1x Authentication, MAB)
+    - Device Administration using ISE
+=================================================================================================
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 1 : Configuring a LAN - To - LAN IPSec Tunnel between R1 & R2 to encrypt traffic between 10.1.1.0/24 & 10.2.2.0/24 behind the respective Routers
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp policy 5
+ authentication pre-share
+ encryption 3des
+ hash md5
+ group 2
+!
+crypto isakmp key cisco123 address 200.1.1.1
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET esp-3des esp-sha-hmac
+
+! 3. Interesting Traffic - Crypto ACL
+
+access-list 101 permit ip 10.1.1.0 0.0.0.255 10.2.2.0 0.0.0.255
+
+! 4. Link the above parameters to each other. This is done by using a Crypto Map Component
+
+crypto map CMAP 10 ipsec-isakmp
+ match address 101
+ set peer 200.1.1.1
+ set transform-set TSET
+
+! 5. Apply the Crypto Map on the outgoing Interface
+
+Interface E 0/0
+ crypto map CMAP
+
+R2
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp policy 15
+ authentication pre-share
+ encryption 3des
+ hash md5
+ group 2
+!
+crypto isakmp key cisco123 address 199.1.1.1
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET esp-3des esp-sha-hmac
+
+! 3. Interesting Traffic - Crypto ACL
+
+access-list 101 permit ip  10.2.2.0 0.0.0.255 10.1.1.0 0.0.0.255
+
+! 4. Link the above parameters to each other. This is done by using a Crypto Map Component
+
+crypto map CMAP 10 ipsec-isakmp
+ match address 101
+ set peer 199.1.1.1
+ set transform-set TSET
+
+! 5. Apply the Crypto Map on the outgoing Interface
+
+Interface E 0/0
+ crypto map CMAP
+
+Verification Commands:
+
+Phase I - Show crypto isakmp sa
+Phase II - Show crypto ipsec sa
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 2 : Configuring a LAN - To - LAN IPSec Tunnel between R1 & R2 to encrypt traffic between 10.1.1.0/24 & 10.2.2.0/24 behind the respective Routers
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1 - Los Angeles
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp policy 5
+ authentication pre-share
+ encryption 3des
+ hash md5
+ group 2
+!
+crypto isakmp key cisco123 address 192.1.20.2
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET esp-3des esp-sha-hmac
+
+! 3. Interesting Traffic - Crypto ACL
+
+access-list 101 permit ip 10.1.1.0 0.0.0.255 10.2.2.0 0.0.0.255
+
+! 4. Link the above parameters to each other. This is done by using a Crypto Map Component
+
+crypto map CMAP 10 ipsec-isakmp
+ match address 101
+ set peer 192.1.20.2
+ set transform-set TSET
+
+! 5. Apply the Crypto Map on the outgoing Interface
+
+Interface E 0/0
+ crypto map CMAP
+
+R2 - Sydney
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp policy 15
+ authentication pre-share
+ encryption 3des
+ hash md5
+ group 2
+!
+crypto isakmp key cisco123 address 192.1.10.1
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET esp-3des esp-sha-hmac
+
+! 3. Interesting Traffic - Crypto ACL
+
+access-list 102 permit ip  10.2.2.0 0.0.0.255 10.1.1.0 0.0.0.255
+
+! 4. Link the above parameters to each other. This is done by using a Crypto Map Component
+
+crypto map CMAP 10 ipsec-isakmp
+ match address 101
+ set peer 192.1.10.1
+ set transform-set TSET
+
+! 5. Apply the Crypto Map on the outgoing Interface
+
+Interface E 0/0
+ crypto map CMAP
+
+Verification Commands:
+
+Phase I - Show crypto isakmp sa
+Phase II - Show crypto ipsec sa
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 3 : Configuring a LAN - To - LAN IPSec Tunnel between R1 & R5 to encrypt traffic between 10.1.1.0/24 & 10.5.5.0/24 behind the respective Routers
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1 - Los Angeles
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp key cisco123 address 192.1.50.5
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET-2 esp-3des esp-md5-hmac
+
+! 3. Interesting Traffic - Crypto ACL
+
+access-list 102 permit ip 10.1.1.0 0.0.0.255 10.5.5.0 0.0.0.255
+
+! 4. Link the above parameters to each other. This is done by using a Crypto Map Component
+
+crypto map CMAP 20 ipsec-isakmp
+ match address 102
+ set peer 192.1.50.5
+ set transform-set TSET-2
+
+! 5. Apply the Crypto Map on the outgoing Interface
+
+
+R2 - London
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp policy 15
+ authentication pre-share
+ encryption 3des
+ hash md5
+ group 2
+!
+crypto isakmp key cisco123 address 192.1.10.1
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET esp-3des esp-md5-hmac
+
+! 3. Interesting Traffic - Crypto ACL
+
+access-list 101 permit ip  10.5.5.0 0.0.0.255 10.1.1.0 0.0.0.255
+
+! 4. Link the above parameters to each other. This is done by using a Crypto Map Component
+
+crypto map CMAP 10 ipsec-isakmp
+ match address 101
+ set peer 192.1.10.1
+ set transform-set TSET
+
+! 5. Apply the Crypto Map on the outgoing Interface
+
+Interface E 0/0
+ crypto map CMAP
+
+Verification Commands:
+
+Phase I - Show crypto isakmp sa
+Phase II - Show crypto ipsec sa
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 4 : Configuring a LAN - To - LAN GRE VPN to connect R1 & R2 to each other using a Tunnel Interface. Set the Tunnel Network to 192.168.1.0/24. Run EIGRP in AS 111 to route the LAN segments over the Tunnel Network.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+! 1. Configure the Tunnel Interface
+
+R1 
+
+Interface Tunnel 1
+ ip address 192.168.1.1 255.255.255.0
+ tunnel source 199.1.1.1
+ tunnel destination 200.1.1.1
+
+R2
+
+Interface Tunnel 1
+ ip address 192.168.1.2 255.255.255.0
+ tunnel source E 0/0
+ tunnel destination 199.1.1.1
+
+! 2. Configure the Routing Protocol on the Tunnel Interface and the Internal LAN Segments.
+
+R1
+
+Router eigrp 111
+ network 192.168.1.0
+ network 10.0.0.0
+
+R2
+
+Router eigrp 111
+ network 192.168.1.0
+ network 10.0.0.0
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 5 : Encrypt all the traffic that leaves the tunnel interface by using IPSec (GRE Over IPSec).
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp policy 10
+ authentication pre-share
+ hash md5
+ encryption 3des
+ group 2
+crypto isakmp key cisco123 address 200.1.1.1
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET esp-3des esp-md5-hmac
+
+! 3. Configure an IPSec Profile. You will the transform-set to it. The Profile later on will be applied to the Tunnel Interface.
+
+crypto ipsec profile IPROF
+ set transform-set TSET
+
+! 4. Apply the IPSec Profile to the Outgoing Tunnel Interface.
+
+Interface Tunnel 1
+ tunnel protection ipsec profile IPROF
+
+R2
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp policy 10
+ authentication pre-share
+ hash md5
+ encryption 3des
+ group 2
+crypto isakmp key cisco123 address 199.1.1.1
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET esp-3des esp-md5-hmac
+
+! 3. Configure an IPSec Profile. You will the transform-set to it. The Profile later on will be applied to the Tunnel Interface.
+
+crypto ipsec profile IPROF
+ set transform-set TSET
+
+! 4. Apply the IPSec Profile to the Outgoing Tunnel Interface.
+
+Interface Tunnel 1
+ tunnel protection ipsec profile IPROF
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 6 : Configure the existing GRE Over IPSec Tunnel to use Transport Mode
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1
+
+crypto ipsec transform-set TSET esp-3des esp-md5-hmac
+ mode transport
+
+R2
+
+crypto ipsec transform-set TSET esp-3des esp-md5-hmac
+ mode transport
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 7 : Change the Tunnel Protocol to IPSec eliminating GRE completely from the picture.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1
+
+Interface Tunnel 1
+ tunnel mode ipsec ipv4
+
+R2
+
+Interface Tunnel 1
+ tunnel mode ipsec 
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 7 : Change the Tunnel Protocol to IPSec eliminating GRE completely from the picture.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1
+
+Interface Tunnel 1
+ tunnel mode ipsec ipv4
+
+R2
+
+Interface Tunnel 1
+ tunnel mode ipsec ipv4
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 8 : -Configure a Native IPSec Tunnel Interface to connect R1 & R2 private networks to each other with Encryption.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp policy 10
+ authentication pre-share
+ hash md5
+ encryption 3des
+ group 2
+crypto isakmp key cisco123 address 200.1.1.1
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET esp-3des esp-md5-hmac
+
+! 3. IPSec Profile
+
+crypto ipsec profile IPROF
+ set transform-set TSET
+
+! 4. Configure the Tunnel Interface
+
+Interface Tunnel 1
+ ip address 192.168.1.1 255.255.255.0
+ tunnel source 199.1.1.1
+ tunnel destination 200.1.1.1
+ tunnel mode ipsec ipv4
+ tunnel protection ipsec profile IPROF
+
+! 5. Routing Protocol
+
+Router eigrp 111
+ network 192.168.1.1
+ network 10.0.0.0
+
+R2
+
+! 1. Phase I - ISAKMP Parameters
+
+crypto isakmp policy 10
+ authentication pre-share
+ hash md5
+ encryption 3des
+ group 2
+crypto isakmp key cisco123 address 199.1.1.1
+
+! 2. Phase II - ESP Parameters
+
+crypto ipsec transform-set TSET esp-3des esp-md5-hmac
+
+! 3. IPSec Profile
+
+crypto ipsec profile IPROF
+ set transform-set TSET
+
+! 4. Configure the Tunnel Interface
+
+Interface Tunnel 1
+ ip address 192.168.1.2 255.255.255.0
+ tunnel source 200.1.1.1
+ tunnel destination 199.1.1.1
+ tunnel mode ipsec ipv4
+ tunnel protection ipsec profile IPROF
+
+! 5. Routing Protocol
+
+Router eigrp 111
+ network 192.168.1.1
+ network 10.0.0.0
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 9 : Configure a M-GRE Tunnel network (192.168.1.0/24) to connect R1, R2, R3 & R4 to each other on a single network.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1
+
+Interface Tunnel 1
+ ip address 192.168.1.1 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp map 192.168.1.2 199.1.1.2
+ ip nhrp map 192.168.1.3 75.1.1.3
+ ip nhrp map 192.168.1.4 200.1.1.4
+
+R2
+
+Interface Tunnel 1
+ ip address 192.168.1.2 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp map 192.168.1.1 150.5.5.1
+ ip nhrp map 192.168.1.3 75.1.1.3
+ ip nhrp map 192.168.1.4 200.1.1.4
+
+R3
+
+Interface Tunnel 1
+ ip address 192.168.1.3 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 133
+ ip nhrp map 192.168.1.1 150.5.5.1
+ ip nhrp map 192.168.1.2 199.1.1.2
+ ip nhrp map 192.168.1.4 200.1.1.4
+
+R4
+
+Interface Tunnel 1
+ ip address 192.168.1.4 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 11
+ ip nhrp map 192.168.1.1 150.5.5.1
+ ip nhrp map 192.168.1.2 199.1.1.2
+ ip nhrp map 192.168.1.3 75.1.1.3
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 10 : Configure a DMVPN Setup with R1 being the NHS. Configure the other devices to use R1 as the NHS.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1 - NHS
+
+No Interface Tunnel 1
+Interface Tunnel 1
+ ip address 192.168.1.1 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+
+R2 - NH Clients
+
+No Interface Tunnel 1
+Interface Tunnel 1
+ ip address 192.168.1.2 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp nhs 192.168.1.1
+ ip nhrp map 192.168.1.1 150.5.5.1
+
+R3 - NH Clients
+
+No Interface Tunnel 1
+Interface Tunnel 1
+ ip address 192.168.1.3 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp nhs 192.168.1.1
+ ip nhrp map 192.168.1.1 150.5.5.1
+
+R4 - NH Clients
+
+No Interface Tunnel 1
+Interface Tunnel 1
+ ip address 192.168.1.4 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp nhs 192.168.1.1
+ ip nhrp map 192.168.1.1 150.5.5.1
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 11 : Configure EIGRP as the Routing Protocol over the Tunnel Interface to route the internal LAN Segments.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+R1 - NHS
+
+No Interface Tunnel 1
+Interface Tunnel 1
+ ip address 192.168.1.1 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp map multicast dynamic
+ no ip split-horizon eigrp 111
+!
+router eigrp 111
+ network 192.168.1.0
+ network 10.0.0.0
+ network 172.16.0.0
+ 
+
+R2 - NH Clients
+
+No Interface Tunnel 1
+Interface Tunnel 1
+ ip address 192.168.1.2 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp nhs 192.168.1.1
+ ip nhrp map 192.168.1.1 150.5.5.1
+ ip nhrp map multicast 150.5.5.1
+!
+router eigrp 111
+ network 192.168.1.0
+ network 10.0.0.0
+ network 172.16.0.0
+
+
+R3 - NH Clients
+
+No Interface Tunnel 1
+Interface Tunnel 1
+ ip address 192.168.1.3 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp nhs 192.168.1.1
+ ip nhrp map 192.168.1.1 150.5.5.1
+ ip nhrp map multicast 150.5.5.1
+!
+router eigrp 111
+ network 192.168.1.0
+ network 10.0.0.0
+ network 172.16.0.0
+
+R4 - NH Clients
+
+No Interface Tunnel 1
+Interface Tunnel 1
+ ip address 192.168.1.4 255.255.255.0
+ tunnel source E 0/0
+ tunnel mode gre multipoint
+ ip nhrp network-id 1
+ ip nhrp nhs 192.168.1.1
+ ip nhrp map 192.168.1.1 150.5.5.1
+ ip nhrp map multicast 150.5.5.1
+!
+router eigrp 111
+ network 192.168.1.0
+ network 10.0.0.0
+ network 172.16.0.0
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 12 : Configure / Analyze DMVPN Phase I
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+- The Control Plane (Routing Traffic) is all phases is generally setup based on Hub - n - Spoke with the NHS being the Hub.
+- In Phase I, the Data Plane traffic is also forwarded in a Hub - n - Spoke manner where the NHS is the Data Plane Hub.
+- The reason behind it is that the NHS changes the Next Hop address of the LAN Segments to itself before forwarding it from spoke to spoke.
+- DMVPN Phase I is the default Phase for EIGRP as the Routing Protocol.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 13 : Configure / Analyze DMVPN Phase II
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+- The Control Plane (Routing Traffic) is all phases is generally setup based on Hub - n - Spoke with the NHS being the Hub.
+- In Phase II, the Data Plane traffic is forwarded directly between the spokes.
+- This is accomplished by tweaking the Routing protocol.
+- You need to configure the NHS NOT to change the Next Hop of the routes that it propagates from Spoke - to - Spoke.
+- This configuration is done on the NHS.
+
+R1 - NHS
+
+Interface Tunnel 1
+ no ip next-hop-self eigrp 111
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 14 : Configure / Analyze DMVPN Phase III
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+- The Control Plane (Routing Traffic) is all phases is generally setup based on Hub - n - Spoke with the NHS being the Hub.
+- In Phase II, the Data Plane traffic is forwarded directly between the spokes.
+- This is accomplished by tweaking the NHRP.
+- You need to configure the NHS NOT to change the Next Hop of the routes that it propagates from Spoke - to - Spoke.
+- This configuration is done on the NHS.
+- The main advantage of Phase III over Phase II is that it directly creates a Mapping between the LAN Segment and the Public IP. This eliminates a Dual check.
+- It also allows the Hub to perform Route Summarization for all the Spoke routes reducing the size of the Spoke Routing table.
+
+R1 - NHS
+
+Interface Tunnel 1
+ ip nhrp redirect
+
+R2, R3, R4
+
+Interface Tunnel 1
+ ip nhrp shortcut
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Lab # 15 : Encrypting the DMVPN Tunnel using IPSec
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Same Configuration on all the devices
+
+! 1. Phase I
+
+crypto isakmp policy 10
+ auth pre-share
+ encryption 3des
+ hash md5
+ group 2
+crypto isakmp key cisco123 address 0.0.0.0
+
+! 2. Phase II
+
+crypto ipsec transform-set TSET esp-3des esp-sha-hmac
+ mode transport
+
+! 3. IPSec Profile
+
+crypto ipsec profile IPROF
+ set transform-set TSET
+
+! 4. Apply the IPSec Profile to the Tunnel Interface
+
+Interface Tunnel 1
+ tunnel protection ipsec profile IPROF
+
+
+
