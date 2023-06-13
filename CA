@@ -1,0 +1,35 @@
+====================================
+CA Server
+ip domain-name xCloud-hk.net
+ntp server vrf Mgmt 1.1.1.1
+ip http server
+crypto key generate rsa modulus 2048 label c8k1
+!
+crypto pki server CA
+  grant auto
+  issuer-name cn=xCloud, o=Cisco, ou=SE, l=Hong Kong, c=HKG
+  no shut 
+====================================
+CA Client
+
+Ip domain-name xCloud-hk.net
+ntp server vrf Mgmt 1.1.1.1
+ip http server
+crypto key generate rsa modulus 2048 label c8k2
+!
+crypto pki trustpoint xCloud-hk.net
+  enrolment url http://10.1.1.1
+  rsakeypair c8k2
+  revocation none
+====================================
+Authenticate = download CA public key
+
+conf t
+crypto pki authenticate xCloud-hk.net
+====================================
+enroll = sign CSR by CA
+
+conf t
+crypto pki enrol xCloud-hk.net
+
+====================================
