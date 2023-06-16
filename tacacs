@@ -1,0 +1,15 @@
+aaa new-model
+tacacs-server host 10.1.5.10
+tacacs-server key C1sc0123
+aaa authentication login T group tacacs+
+aaa authorization exec T group tacacs+
+aaa authorization command 15 T group tacacs+
+aaa accounting exec T start-stop group tacacs+
+aaa accounting command 15 T start-stop group tacacs+
+line vty 0 15
+  login authentication T
+  authorization exec T
+  authorization command 15 T
+  accounting exec T
+  accounting command 15 T
+  transport input ssh telnet
