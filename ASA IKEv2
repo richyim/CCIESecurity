@@ -1,0 +1,8 @@
+crypto isakmp identity address
+!
+crypto ikev1 policy 10
+  hash
+  authentication
+  group
+  lifetime
+  encryption aes 256
