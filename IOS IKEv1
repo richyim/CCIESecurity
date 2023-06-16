@@ -6,11 +6,11 @@ ip access-list extended VPNACL
 ! destination address is remote site IP range
 !
 crypto isakmp policy 10
-  hash sha1
-  authentication sha1
-  group 14
+  hash sha
+  authentication pre-share
+  group 5
   lifetime 86400
-  encryption aes 256
+  encryption aes-256
 !
 crypto ipsec transform-set TSET esp-aes 256 esp-sha1-hmac
   mode tunnel
