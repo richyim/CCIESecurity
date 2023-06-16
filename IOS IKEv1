@@ -1,0 +1,26 @@
+crypto isakmp key C1sc0123 address 0.0.0.0
+!
+ip access-list extended VPNACL
+  permit ip 192.168.1.0 0.0.0.255 192.168.2.0 0.0.0.255
+! source address is site local IP range
+! destination address is remote site IP range
+!
+crypto isakmp policy 10
+  hash sha1
+  authentication sha1
+  group 14
+  lifetime 86400
+  encryption aes 256
+!
+crypto ipsec transform-set TSET esp-aes 256 esp-sha1-hmac
+  mode tunnel
+!
+crypto map VPNMAP 10 ipsec-isakmp
+  match address VPNACL
+  set peer 10.1.2.1
+  set transform-set TSET
+  reverse route static
+!
+int gi 2
+  ip add 10.1.1.1 255.255.255.0
+  crypto map VPNMAP
