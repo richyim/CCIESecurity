@@ -19,7 +19,7 @@ group-policy GROUPPOLICYREMOTEACCESS attributes
 tunnel-group TUNNELGROUPREMOTEACCESS type remote-access
 tunnel-group TUNNELGROUPREMOTEACCESS general-attributes
   default-group-policy GROUPPOLICYREMOTEACCESS
-tunnel-group TUNNELGROUPREMOTEACCESS webvp-attributes
+tunnel-group TUNNELGROUPREMOTEACCESS webvpn-attributes
   alias-group xCloud-hk.net enable
 !
 webvpn
